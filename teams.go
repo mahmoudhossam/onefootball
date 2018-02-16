@@ -21,12 +21,9 @@ type Team struct {
 
 func GetAttribute(dec *json.Decoder, attribute string) string {
 	for dec.More() {
-		token, err := dec.Token()
-		if err != nil {
-			panic(err)
-		}
+		token := NextToken(dec)
 		if token == attribute {
-			token, err = dec.Token()
+			token := NextToken(dec)
 			return token.(string)
 		}
 	}
@@ -47,19 +44,6 @@ func GetTeamData(dec *json.Decoder) (players []Player) {
 		}
 	}
 	return
-}
-
-func IsFinished(dec *json.Decoder) bool {
-	for dec.More() {
-		token := NextToken(dec)
-		if token == "code" {
-			token := NextToken(dec)
-			if token != 0.0 {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func NextToken(dec *json.Decoder) (token json.Token) {
@@ -83,11 +67,14 @@ func main() {
 		"Manchester Utd":   []Player{},
 		"FC Bayern Munich": []Player{},
 	}
-	finished := false
 	intId := 1
-	for !finished {
+	found := 0
+	for {
 		url := fmt.Sprintf("https://vintagemonster.onefootball.com/api/teams/en/%v.json", intId)
 		resp, err := http.Get(url)
+		if resp.StatusCode != 200 {
+			break
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -95,10 +82,13 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		if team, ok := teams[GetAttribute(dec, "name")]; ok {
-			fmt.Println(team)
+		if _, ok := teams[GetAttribute(dec, "name")]; ok {
+			fmt.Println(intId)
+			found++
 		}
-		finished = IsFinished(dec)
+		if found == len(teams) {
+			break
+		}
 		intId++
 	}
 
