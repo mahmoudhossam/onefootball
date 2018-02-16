@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	//"fmt"
+	"fmt"
 	"net/http"
 	"testing"
 )
@@ -38,7 +38,7 @@ func TestGetTeamData(t *testing.T) {
 		t.Error(err)
 	}
 	teamPlayers := GetTeamData(json.NewDecoder(resp.Body))
-	if len(teamPlayers) != 34 {
+	if len(teamPlayers) != 34 && fmt.Sprintf("%T", teamPlayers[0]) == "Player" {
 		t.FailNow()
 	}
 }
