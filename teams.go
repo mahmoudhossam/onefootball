@@ -17,12 +17,6 @@ type Player struct {
 	Teams []string `json:"teams"`
 }
 
-type Team struct {
-	Name       string   `json:"name"`
-	IsNational bool     `json:"isNational"`
-	Players    []Player `json:"players"`
-}
-
 var roster map[string]Player
 
 func GetAttribute(dec *json.Decoder, attribute string) string {
