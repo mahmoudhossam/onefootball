@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -22,7 +23,6 @@ type Team struct {
 	Players    []Player `json:"players"`
 }
 
-var teams = []string{"Germany", "England", "France", "Spain", "Arsenal", "Chelsea", "Barcelona", "Real Madrid", "Manchester Utd", "FC Bayern Munich"}
 var roster map[string]Player
 
 func GetAttribute(dec *json.Decoder, attribute string) string {
@@ -83,15 +83,19 @@ func GetURL(url string, ch chan io.ReadCloser) {
 }
 
 func ProcessJSONData(in chan io.ReadCloser, wg *sync.WaitGroup) {
+	teams := []string{"Germany", "England", "France", "Spain", "Arsenal", "Chelsea",
+		"Barcelona", "Real Madrid", "Manchester Utd", "FC Bayern Munich"}
 	defer wg.Done()
 	body := <-in
-	defer body.Close()
 	dec := json.NewDecoder(body)
 	teamName := GetAttribute(dec, "name")
 	for _, t := range teams {
 		if teamName == t {
 			GetTeamData(teamName, dec)
 		}
+	}
+	if err := body.Close(); err != nil {
+		panic(err)
 	}
 }
 
@@ -107,7 +111,14 @@ func main() {
 	}
 	wg.Wait()
 	close(httpData)
+	players := make([]Player, 0)
 	for _, p := range roster {
+		players = append(players, p)
+	}
+	sort.Slice(players, func(i int, j int) bool {
+		return players[i].Name < players[j].Name
+	})
+	for _, p := range players {
 		fmt.Printf("%v; %v; %v.\n", p.Name, p.Age, strings.Join(p.Teams, ","))
 	}
 }
