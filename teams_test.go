@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 )
@@ -19,14 +18,15 @@ func TestGetAttribute(t *testing.T) {
 	}
 }
 
-func TestGetTeamData(t *testing.T) {
-	url := "https://vintagemonster.onefootball.com/api/teams/en/1.json"
+func TestNextToken(t *testing.T) {
+	url := "https://vintagemonster.onefootball.com/api/teams/en/10000.json"
 	resp, err := http.Get(url)
 	if err != nil {
 		t.Error(err)
 	}
-	teamPlayers := GetTeamData(json.NewDecoder(resp.Body))
-	if len(teamPlayers) != 34 && fmt.Sprintf("%T", teamPlayers[0]) == "Player" {
+	dec := json.NewDecoder(resp.Body)
+	token := NextToken(dec)
+	if token.(json.Delim) != '{' {
 		t.FailNow()
 	}
 }
