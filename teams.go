@@ -118,7 +118,7 @@ func main() {
 	sort.Slice(players, func(i int, j int) bool {
 		return players[i].Name < players[j].Name
 	})
-	for _, p := range players {
-		fmt.Printf("%v; %v; %v.\n", p.Name, p.Age, strings.Join(p.Teams, ","))
+	for i, p := range players {
+		fmt.Printf("%v. %v; %v; %v\n", i+1, p.Name, p.Age, strings.Join(p.Teams, ","))
 	}
 }
